@@ -1,0 +1,36 @@
+# 可选功能：生成"贡献贪吃蛇"SVG，输出到 output 分支
+# 不需要的话直接删掉本文件即可；README.md 中对应图片默认是注释状态。
+name: Generate contribution snake
+
+on:
+  # 默认仅手动触发，避免新仓库产生定时任务失败通知。
+  # 想每天自动更新，取消下面两行的注释即可：
+  # schedule:
+  #   - cron: "23 2 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Generate snake SVGs
+        uses: Platane/snk/svg-only@v3
+        with:
+          github_user_name: ${{ github.repository_owner }}
+          outputs: |
+            dist/github-contribution-grid-snake.svg
+            dist/github-contribution-grid-snake-dark.svg?palette=github-dark
+
+      - name: Publish to output branch
+        uses: crazy-max/ghaction-github-pages@v4
+        with:
+          target_branch: output
+          build_dir: dist
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
